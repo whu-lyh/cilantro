@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef HAVE_PANGOLIN
 #include <cilantro/renderable.hpp>
 #include <pangolin/pangolin.h>
 
@@ -267,3 +268,4 @@ namespace cilantro {
         std::string text;
     };
 }
+#endif

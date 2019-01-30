@@ -3,7 +3,8 @@
 
 `cilantro` is a lean and fast C++ library for working with point cloud data, with emphasis given to the 3D case.
 It includes efficient implementations for a variety of common operations, providing a clean API and attempting to minimize the amount of boilerplate code.
-The library is extensively templated, enabling operations on point data of arbitrary numerical type and dimensionality (where applicable) and featuring a modular/extensible design of the more complex procedures, while, at the same time, providing convenience aliases/wrappers for the most common cases.
+The library is extensively templated, enabling operations on data of arbitrary numerical type and dimensionality (where applicable) and featuring a modular/extensible design of the more complex procedures.
+At the same time, convenience aliases/wrappers for the most common cases are provided.
 A high-level description of `cilantro` can be found in our [technical report](https://arxiv.org/abs/1807.00399).
 
 ## Supported functionality
@@ -28,8 +29,8 @@ A high-level description of `cilantro` can be found in our [technical report](ht
 
 #### Geometric registration:
 - Multiple generic Iterative Closest Point implementations that support arbitrary correspondence search methods in arbitrary point feature spaces for:
-    - **Rigid** alignment under the point-to-point metric (general dimension), point-to-plane metric (3D), or any combination thereof
-    - **Non-rigid** alignment of 3D point sets, by means of a robustly regularized, locally rigid warp field, under any combination of the point-to-point and point-to-plane metrics; implementations for both *densely* and *sparsely* (similarly to [DynamicFusion](http://grail.cs.washington.edu/projects/dynamicfusion/)) supported warp fields are provided
+    - **Rigid** or **affine** alignment under the point-to-point metric (general dimension), point-to-plane metric (2D or 3D), or any combination thereof
+    - **Non-rigid** alignment of 2D or 3D point sets, by means of a robustly regularized, **locally rigid** or **locally affine** deformation field, under any combination of the point-to-point and point-to-plane metrics; implementations for both *densely* and *sparsely* (similarly to [DynamicFusion](http://grail.cs.washington.edu/projects/dynamicfusion/)) supported warp fields are provided
 
 #### Robust model estimation:
 - A RANSAC estimator template and instantiations thereof for general dimension:
@@ -41,8 +42,8 @@ A high-level description of `cilantro` can be found in our [technical report](ht
 - A powerful, extensible, and easy to use 3D visualizer
 
 ## Dependencies
-- [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) (3.3 or newer)
-- [Pangolin](https://github.com/stevenlovegrove/Pangolin) (built with Eigen enabled)
+- [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) (3.3 or newer) [**required**]
+- [Pangolin](https://github.com/stevenlovegrove/Pangolin) (built with Eigen enabled) [**optional**; needed for visualization modules and most examples]
 
 ## Building
 `cilantro` is developed and tested on Ubuntu 14.04, 16.04, and 18.04 variants using [CMake](https://cmake.org/).
@@ -68,11 +69,17 @@ One such input is bundled in `examples/test_clouds` for quick testing.
 The library is released under the [MIT license](https://github.com/kzampog/cilantro/blob/master/LICENSE).
 If you use `cilantro` in your research, please cite our [technical report](https://arxiv.org/abs/1807.00399):
 ```
-@article{cilantro,
-    author = {Konstantinos Zampogiannis and Cornelia Ferm{\"u}ller and Yiannis Aloimonos},
-    title = {cilantro: a lean, versatile, and efficient library for point cloud data processing},
-    archivePrefix = "arXiv",
-    eprint = {1807.00399},
-    year = {2018}
+@inproceedings{zampogiannis2018cilantro,
+    author = {Zampogiannis, Konstantinos and Fermuller, Cornelia and Aloimonos, Yiannis},
+    title = {cilantro: A Lean, Versatile, and Efficient Library for Point Cloud Data Processing},
+    booktitle = {Proceedings of the 26th ACM International Conference on Multimedia},
+    series = {MM '18},
+    year = {2018},
+    isbn = {978-1-4503-5665-7},
+    location = {Seoul, Republic of Korea},
+    pages = {1364--1367},
+    doi = {10.1145/3240508.3243655},
+    publisher = {ACM},
+    address = {New York, NY, USA}
 }
 ```

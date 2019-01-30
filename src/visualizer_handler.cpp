@@ -1,3 +1,4 @@
+#ifdef HAVE_PANGOLIN
 #include <cilantro/visualizer_handler.hpp>
 #include <cilantro/visualizer.hpp>
 
@@ -406,3 +407,4 @@ namespace cilantro {
         }
     }
 }
+#endif

@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef HAVE_PANGOLIN
 #include <pangolin/pangolin.h>
 
 namespace cilantro {
@@ -90,3 +91,4 @@ namespace cilantro {
         pangolin::GLprecision n[3];
     };
 }
+#endif
