@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2018 Yixuan Qiu <yixuan.qiu@cos.name>
+// Copyright (C) 2016-2019 Yixuan Qiu <yixuan.qiu@cos.name>
 //
 // This Source Code Form is subject to the terms of the Mozilla
 // Public License v. 2.0. If a copy of the MPL was not distributed
@@ -8,8 +8,10 @@
 #define DENSE_SYM_SHIFT_SOLVE_H
 
 #include <Eigen/Core>
-#include <Eigen/Cholesky>
 #include <stdexcept>
+
+#include "../LinAlg/BKLDLT.h"
+#include "../Util/CompInfo.h"
 
 namespace Spectra {
 
@@ -25,6 +27,7 @@ template <typename Scalar, int Uplo = Eigen::Lower>
 class DenseSymShiftSolve
 {
 private:
+    typedef Eigen::Index Index;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> Matrix;
     typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> Vector;
     typedef Eigen::Map<const Vector> MapConstVec;
@@ -33,7 +36,7 @@ private:
 
     ConstGenericMatrix m_mat;
     const int m_n;
-    Eigen::LDLT<Matrix, Uplo> m_solver;
+    BKLDLT<Scalar> m_solver;
 
 public:
     ///
@@ -54,18 +57,20 @@ public:
     ///
     /// Return the number of rows of the underlying matrix.
     ///
-    int rows() const { return m_n; }
+    Index rows() const { return m_n; }
     ///
     /// Return the number of columns of the underlying matrix.
     ///
-    int cols() const { return m_n; }
+    Index cols() const { return m_n; }
 
     ///
     /// Set the real shift \f$\sigma\f$.
     ///
     void set_shift(Scalar sigma)
     {
-        m_solver.compute(m_mat - sigma * Matrix::Identity(m_n, m_n));
+        m_solver.compute(m_mat, Uplo, sigma);
+        if(m_solver.info() != SUCCESSFUL)
+            throw std::invalid_argument("DenseSymShiftSolve: factorization failed with the given shift");
     }
 
     ///
