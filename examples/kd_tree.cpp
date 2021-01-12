@@ -1,6 +1,5 @@
-#include <cilantro/kd_tree.hpp>
-#include <cilantro/io.hpp>
 #include <iostream>
+#include <cilantro/core/kd_tree.hpp>
 
 int main(int argc, char ** argv) {
     std::vector<Eigen::Vector3f> points;
@@ -13,7 +12,7 @@ int main(int argc, char ** argv) {
     points.emplace_back(1, 1, 0);
     points.emplace_back(1, 1, 1);
 
-    cilantro::KDTree3f tree(points);
+    cilantro::KDTree3f<> tree(points);
 
     cilantro::NeighborSet<float> nn = tree.kNNInRadiusSearch(Eigen::Vector3f(0.1, 0.1, 0.4), 2, 1.001);
 

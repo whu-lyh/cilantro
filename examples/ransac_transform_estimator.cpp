@@ -1,7 +1,6 @@
-#include <cilantro/point_cloud.hpp>
-#include <cilantro/ransac_transform_estimator.hpp>
-#include <cilantro/visualizer.hpp>
-#include <cilantro/common_renderables.hpp>
+#include <cilantro/utilities/point_cloud.hpp>
+#include <cilantro/model_estimation/ransac_transform_estimator.hpp>
+#include <cilantro/visualization.hpp>
 
 void callback(unsigned char key, bool &re_estimate, bool &randomize) {
     if (key == 'a') {
@@ -68,7 +67,7 @@ int main(int argc, char **argv) {
 
             viz.remove("corr");
 
-            cilantro::RigidTransformRANSACEstimator3f te(dst.points, src.points, corr);
+            cilantro::RigidTransformRANSACEstimator3f<> te(dst.points, src.points, corr);
             te.setMaxInlierResidual(0.01f).setTargetInlierCount((size_t)(0.50*corr.size())).setMaxNumberOfIterations(250).setReEstimationStep(true);
 
             cilantro::RigidTransform3f tform = te.estimate().getModel();
@@ -77,7 +76,6 @@ int main(int argc, char **argv) {
             std::cout << "RANSAC iterations: " << te.getNumberOfPerformedIterations() << ", inlier count: " << te.getNumberOfInliers() << std::endl;
 
             src.transform(tform);
-
             viz.addObject<cilantro::PointCloudRenderable>("src", src, cilantro::RenderingProperties().setPointColor(1,0,0));
 
             std::cout << "Press 'd' for a new random pose" << std::endl;

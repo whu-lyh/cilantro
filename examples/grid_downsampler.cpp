@@ -1,8 +1,7 @@
-//#include <cilantro/grid_downsampler.hpp>
-#include <cilantro/point_cloud.hpp>
-#include <cilantro/visualizer.hpp>
-#include <cilantro/common_renderables.hpp>
-#include <cilantro/timer.hpp>
+//#include <cilantro/core/grid_downsampler.hpp>
+#include <cilantro/utilities/point_cloud.hpp>
+#include <cilantro/visualization.hpp>
+#include <cilantro/utilities/timer.hpp>
 
 int main(int argc, char ** argv) {
     if (argc < 2) {
@@ -35,6 +34,9 @@ int main(int argc, char ** argv) {
 
     cilantro::Visualizer viz2("VoxelGrid demo", "disp2");
     viz2.addObject<cilantro::PointCloudRenderable>("cloud_d", cloud_d, cilantro::RenderingProperties());
+
+    // Keep viewpoints in sync
+    viz2.setRenderState(viz1.getRenderState());
 
     std::cout << "Press 'n' to toggle rendering of normals" << std::endl;
     while (!viz1.wasStopped() && !viz2.wasStopped()) {

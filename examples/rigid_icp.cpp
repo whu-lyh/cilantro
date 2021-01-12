@@ -1,8 +1,7 @@
-#include <cilantro/icp_common_instances.hpp>
-#include <cilantro/point_cloud.hpp>
-#include <cilantro/visualizer.hpp>
-#include <cilantro/common_renderables.hpp>
-#include <cilantro/timer.hpp>
+#include <cilantro/registration/icp_common_instances.hpp>
+#include <cilantro/utilities/point_cloud.hpp>
+#include <cilantro/visualization.hpp>
+#include <cilantro/utilities/timer.hpp>
 
 void color_toggle(cilantro::Visualizer &viz) {
     cilantro::RenderingProperties rp = viz.getRenderingProperties("dst");
@@ -143,19 +142,23 @@ int main(int argc, char ** argv) {
     cilantro::Visualizer registration_viz(window_name, "registration");
     cilantro::Visualizer residuals_viz(window_name, "residuals");
 
+    // Keep viewpoints in sync
+    registration_viz.setRenderState(initial_viz.getRenderState());
+    residuals_viz.setRenderState(initial_viz.getRenderState());
+
     // Initial state
     initial_viz.registerKeyboardCallback('c', std::bind(color_toggle, std::ref(initial_viz)));
     initial_viz.addObject<cilantro::PointCloudRenderable>("dst", dst, cilantro::RenderingProperties().setPointColor(0,0,1));
     initial_viz.addObject<cilantro::PointCloudRenderable>("src", src, cilantro::RenderingProperties().setPointColor(1,0,0));
 
     // Registration result
-    src.transform(tf_est);
+    auto src_t = src.transformed(tf_est);
     registration_viz.registerKeyboardCallback('c', std::bind(color_toggle, std::ref(registration_viz)));
     registration_viz.addObject<cilantro::PointCloudRenderable>("dst", dst, cilantro::RenderingProperties().setPointColor(0,0,1));
-    registration_viz.addObject<cilantro::PointCloudRenderable>("src", src, cilantro::RenderingProperties().setPointColor(1,0,0));
+    registration_viz.addObject<cilantro::PointCloudRenderable>("src", src_t, cilantro::RenderingProperties().setPointColor(1,0,0));
 
     // Residuals
-    residuals_viz.addObject<cilantro::PointCloudRenderable>("src", src, cilantro::RenderingProperties().setUseLighting(false))
+    residuals_viz.addObject<cilantro::PointCloudRenderable>("src", src_t, cilantro::RenderingProperties().setUseLighting(false))
             ->setPointValues(residuals);
 
     std::cout << "Press 'c' to toggle point cloud colors" << std::endl;

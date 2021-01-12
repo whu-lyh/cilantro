@@ -1,8 +1,7 @@
-#include <cilantro/icp_common_instances.hpp>
-#include <cilantro/point_cloud.hpp>
-#include <cilantro/visualizer.hpp>
-#include <cilantro/common_renderables.hpp>
-#include <cilantro/timer.hpp>
+#include <cilantro/registration/icp_common_instances.hpp>
+#include <cilantro/utilities/point_cloud.hpp>
+#include <cilantro/visualization.hpp>
+#include <cilantro/utilities/timer.hpp>
 
 void color_toggle(cilantro::Visualizer &viz) {
     cilantro::RenderingProperties rp = viz.getRenderingProperties("dst");
@@ -51,10 +50,10 @@ int main(int argc, char ** argv) {
     cilantro::KDTree<float,3> control_tree(control_points);
 
     // Find which control nodes affect each point in src
-    cilantro::NeighborhoodSet<float> src_to_control_nn = control_tree.search(src.points, cilantro::KNNNeighborhoodSpecification(4));
+    cilantro::NeighborhoodSet<float> src_to_control_nn = control_tree.search(src.points, cilantro::KNNNeighborhoodSpecification<>(4));
 
     // Get regularization neighborhoods for control nodes
-    cilantro::NeighborhoodSet<float> regularization_nn = control_tree.search(control_points, cilantro::KNNNeighborhoodSpecification(8));
+    cilantro::NeighborhoodSet<float> regularization_nn = control_tree.search(control_points, cilantro::KNNNeighborhoodSpecification<>(8));
 
     // Perform ICP registration
     cilantro::Timer timer;
@@ -89,7 +88,7 @@ int main(int argc, char ** argv) {
 //    float max_correspondence_dist_sq = 0.04f*0.04f;
 //
 //    std::vector<cilantro::NeighborSet<float>> regularization_nn;
-//    cilantro::KDTree3f(src.points).search(src.points, cilantro::KNNNeighborhoodSpecification(12), regularization_nn);
+//    cilantro::KDTree3f(src.points).search(src.points, cilantro::KNNNeighborhoodSpecification<>(12), regularization_nn);
 //
 //    // Perform ICP registration
 //    cilantro::Timer timer;
@@ -133,6 +132,10 @@ int main(int argc, char ** argv) {
     cilantro::Visualizer initial_and_warp_viz(window_name, "initial");
     cilantro::Visualizer registration_viz(window_name, "registration");
     cilantro::Visualizer residuals_viz(window_name, "residuals");
+
+    // Keep viewpoints in sync
+    registration_viz.setRenderState(initial_and_warp_viz.getRenderState());
+    residuals_viz.setRenderState(initial_and_warp_viz.getRenderState());
 
     // Warp src
     auto warped = src.transformed(tf_est);

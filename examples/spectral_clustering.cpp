@@ -1,9 +1,8 @@
-#include <cilantro/nearest_neighbor_graph_utilities.hpp>
-#include <cilantro/spectral_clustering.hpp>
-#include <cilantro/point_cloud.hpp>
-#include <cilantro/visualizer.hpp>
-#include <cilantro/common_renderables.hpp>
-#include <cilantro/timer.hpp>
+#include <cilantro/utilities/nearest_neighbor_graph_utilities.hpp>
+#include <cilantro/clustering/spectral_clustering.hpp>
+#include <cilantro/utilities/point_cloud.hpp>
+#include <cilantro/visualization.hpp>
+#include <cilantro/utilities/timer.hpp>
 
 void generate_input_data(cilantro::VectorSet3f &points, Eigen::SparseMatrix<float> &affinities) {
     points.resize(3, 1700);
@@ -18,7 +17,7 @@ void generate_input_data(cilantro::VectorSet3f &points, Eigen::SparseMatrix<floa
 
     // Build neighborhood graph
     // 30 neighbors
-    cilantro::NeighborhoodSet<float> nn = cilantro::KDTree3f(points).search(points, cilantro::KNNNeighborhoodSpecification(30));
+    cilantro::NeighborhoodSet<float> nn = cilantro::KDTree3f<>(points).search(points, cilantro::KNNNeighborhoodSpecification<>(30));
     affinities = cilantro::getNNGraphFunctionValueSparseMatrix(nn, cilantro::RBFKernelWeightEvaluator<float>(), true);
 }
 
@@ -35,9 +34,9 @@ int main(int argc, char ** argv) {
     cilantro::Timer timer;
     timer.start();
 
-//    cilantro::SpectralClustering<float,2> sc(data);
-//    cilantro::SpectralClustering<float> sc(affinities, max_num_clusters, true, cilantro::GraphLaplacianType::UNNORMALIZED);
-//    cilantro::SpectralClustering<float> sc(affinities, max_num_clusters, true, cilantro::GraphLaplacianType::NORMALIZED_SYMMETRIC);
+    // cilantro::SpectralClustering<float,2> sc(affinities);
+    // cilantro::SpectralClustering<float> sc(affinities, max_num_clusters, true, cilantro::GraphLaplacianType::UNNORMALIZED);
+    // cilantro::SpectralClustering<float> sc(affinities, max_num_clusters, true, cilantro::GraphLaplacianType::NORMALIZED_SYMMETRIC);
     cilantro::SpectralClustering<float> sc(affinities, max_num_clusters, true, cilantro::GraphLaplacianType::NORMALIZED_RANDOM_WALK);
 
     timer.stop();
@@ -77,6 +76,9 @@ int main(int argc, char ** argv) {
     cilantro::Visualizer viz2("SpectralClustering demo", "disp2");
     viz2.addObject<cilantro::PointCloudRenderable>("cloud_seg", points, cilantro::RenderingProperties().setPointSize(5.0f))
             ->setPointColors(colors);
+
+    // Keep viewpoints in sync
+    viz2.setRenderState(viz1.getRenderState());
 
     while (!viz1.wasStopped() && !viz2.wasStopped()) {
         viz1.clearRenderArea();

@@ -1,6 +1,8 @@
-<div>
-    <img src = "https://kzampog.github.io/images/cilantro_logo.png" width="256" alt = "Logo" />
-    <br>
+<div align = "center">
+    <img src = "https://kzampog.github.io/images/cilantro_logo.png" width="300" alt = "Logo" />
+</div>
+
+<div align = "center">
     <a href = "https://travis-ci.org/kzampog/cilantro">
         <img src = "https://travis-ci.org/kzampog/cilantro.svg?branch=master" alt = "Build Status" />
     </a>
@@ -9,6 +11,9 @@
     </a>
     <a href = "https://codedocs.xyz/kzampog/cilantro/">
         <img src = "https://codedocs.xyz/kzampog/cilantro.svg" alt = "Documentation" />
+    </a>
+    <a href = "https://github.com/kzampog/cilantro/blob/master/LICENSE">
+        <img src = "https://img.shields.io/github/license/kzampog/cilantro" alt = "License" />
     </a>
 </div>
 
@@ -22,7 +27,7 @@ A high-level description of `cilantro` can be found in our [technical report](ht
 ## Supported functionality
 #### Basic operations:
 - General dimension kd-trees (using bundled [nanoflann](https://github.com/jlblancoc/nanoflann))
-- Surface normal and curvature estimation from raw point clouds
+- Surface normal and curvature (robust) estimation from raw point clouds
 - General dimension grid-based point cloud resampling
 - Principal Component Analysis
 - Basic I/O utilities for 3D point clouds (in PLY format, using bundled [tinyply](https://github.com/ddiakopoulos/tinyply)) and Eigen matrices
@@ -64,12 +69,11 @@ A high-level description of `cilantro` can be found in our [technical report](ht
 - A powerful, extensible, and easy to use 3D visualizer
 
 ## Dependencies
-- [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) (3.3 or newer) [**required**]
+- [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) (version 3.3 or newer) [**required**]
 - [Pangolin](https://github.com/stevenlovegrove/Pangolin) (built with Eigen enabled) [**optional**; needed for visualization modules and most examples]
 
 ## Building
-`cilantro` is developed and tested on Ubuntu 14.04, 16.04, and 18.04 variants using [CMake](https://cmake.org/).
-Please note that you may have to manually set up a recent version of Eigen on Ubuntu 14.04, as the one provided in the official repos is outdated.
+`cilantro` is developed and tested on Ubuntu variants (16.04 and newer) using [CMake](https://cmake.org/).
 To clone and build the library (with bundled examples), execute the following in a terminal:
 
 ```
@@ -82,7 +86,7 @@ make -j
 ```
 
 ## Documentation
-Documentation ([readthedocs.io](http://cilantro.readthedocs.io/en/latest/?badge=latest), [Doxygen API documentation](https://codedocs.xyz/kzampog/cilantro/)) is a work in progress.
+Documentation ([readthedocs.io](http://cilantro.readthedocs.io/en/latest/?badge=latest), [Doxygen API reference](https://codedocs.xyz/kzampog/cilantro/)) is a work in progress.
 The short provided examples (built by default) cover a significant part of the library's functionality.
 Most of them expect a single command-line argument (path to a point cloud file in PLY format).
 One such input is bundled in `examples/test_clouds` for quick testing.

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.9)
 project(cilantro)
 
 # Build setup
@@ -7,26 +7,33 @@ set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_STANDARD 11)
 
 # Packages
-find_package(Eigen3 REQUIRED)
+find_package(Eigen3 REQUIRED NO_MODULE)
+# below is a workaround for some buggy Eigen exports which managed to get into some distros
+if(NOT TARGET Eigen3::Eigen)
+    message("Eigen has buggy exported package, but headers are found: ${EIGEN3_INCLUDE_DIRS}. Applying workaround.")
+    add_library(Eigen INTERFACE IMPORTED GLOBAL)
+    target_include_directories(Eigen INTERFACE "${EIGEN3_INCLUDE_DIRS}")
+    add_library(Eigen3::Eigen ALIAS Eigen)
+endif()
+
 find_package(Pangolin QUIET)
 if(Pangolin_FOUND)
     set(HAVE_PANGOLIN ON)
+    set(DEPENDS_Pangolin "find_dependency(Pangolin)")
 endif()
 find_package(OpenMP)
-if(OPENMP_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif()
+# if(OPENMP_FOUND)
+#     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+# endif()
 
-set(OTHER_INCLUDES ${EIGEN3_INCLUDE_DIRS} ${Pangolin_INCLUDE_DIRS})
-
-include_directories(include ${CMAKE_CURRENT_BINARY_DIR}/include)
-include_directories(${OTHER_INCLUDES})
+set(OTHER_INCLUDE_DIRS ${Pangolin_INCLUDE_DIRS})
+set(OTHER_LIBRARIES ${Pangolin_LIBRARIES})
 
 if(_WIN_)
-    option( BUILD_SHARED_LIBS    "Build Shared Library" OFF)
+    option(BUILD_SHARED_LIBS "Build Shared Library" OFF)
 else()
-    option( BUILD_SHARED_LIBS    "Build Shared Library" ON)
+    option(BUILD_SHARED_LIBS "Build Shared Library" ON)
 endif()
 
 # Build options
@@ -34,16 +41,25 @@ option(ENABLE_NATIVE_BUILD_OPTIMIZATIONS "Enable native build optimization flags
 option(ENABLE_NON_DETERMINISTIC_PARALLELISM "Enable parallelization that may produce non-deterministic results" ON)
 
 # Build library
-file(GLOB_RECURSE 3rd_src ${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party/*.c ${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party/*.cpp)
-file(GLOB lib_include ${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}/*.hpp ${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME}/*.hpp)
-file(GLOB lib_src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE THIRD_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party/*.c ${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party/*.cpp)
+file(GLOB_RECURSE LIB_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}/*.hpp ${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME}/*.hpp)
+file(GLOB_RECURSE LIB_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
-add_library(${PROJECT_NAME} ${3rd_src} ${lib_include} ${lib_src})
-target_link_libraries(${PROJECT_NAME} ${Pangolin_LIBRARIES})
+add_library(${PROJECT_NAME} ${THIRD_SOURCES} ${LIB_HEADERS} ${LIB_SOURCES})
+target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${OTHER_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+                                                  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+                                                  $<INSTALL_INTERFACE:include>)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${OTHER_LIBRARIES} Eigen3::Eigen)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
+    set(DEPENDS_OpenMP "find_dependency(OpenMP)")
+endif()
+
 if (ENABLE_NATIVE_BUILD_OPTIMIZATIONS)
-	target_compile_options(${PROJECT_NAME} PUBLIC -O3 -march=native -mtune=native)
+    target_compile_options(${PROJECT_NAME} PUBLIC -O3 -march=native -mtune=native)
 else()
-	target_compile_options(${PROJECT_NAME} PUBLIC -O3)
+    target_compile_options(${PROJECT_NAME} PUBLIC -O3)
 endif()
 
 # Configure preprocessor definitions
@@ -87,16 +103,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DI
 
 # Build examples
 option(BUILD_EXAMPLES "Build small example apps" ON)
-if(BUILD_EXAMPLES AND Pangolin_FOUND)
-    file(GLOB example_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/examples/*.cpp)
-    foreach(example_file ${example_files})
-        get_filename_component(example_name ${example_file} NAME_WE)
-        add_executable(${example_name} ${example_file})
-        target_link_libraries(${example_name} ${PROJECT_NAME} ${Pangolin_LIBRARIES})
-        if (ENABLE_NATIVE_BUILD_OPTIMIZATIONS)
-            target_compile_options(${example_name} PUBLIC -O3 -march=native -mtune=native)
-        else()
-            target_compile_options(${example_name} PUBLIC -O3)
-        endif()
-    endforeach(example_file ${example_files})
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
 endif()

@@ -1,7 +1,6 @@
-#include <cilantro/point_cloud.hpp>
-#include <cilantro/ransac_hyperplane_estimator.hpp>
-#include <cilantro/visualizer.hpp>
-#include <cilantro/common_renderables.hpp>
+#include <cilantro/utilities/point_cloud.hpp>
+#include <cilantro/model_estimation/ransac_hyperplane_estimator.hpp>
+#include <cilantro/visualization.hpp>
 
 void callback(bool &re_estimate) {
     re_estimate = true;
@@ -26,12 +25,14 @@ int main(int argc, char **argv) {
 
     std::cout << "Press 'a' for a new estimate" << std::endl;
 
+    cilantro::PointCloud3f planar_cloud;
+
     viz.addObject<cilantro::PointCloudRenderable>("cloud", cloud);
     while (!viz.wasStopped()) {
         if (re_estimate) {
             re_estimate = false;
 
-            cilantro::PlaneRANSACEstimator3f pe(cloud.points);
+            cilantro::PlaneRANSACEstimator3f<> pe(cloud.points);
             pe.setMaxInlierResidual(0.01f).setTargetInlierCount((size_t)(0.15*cloud.size()))
                 .setMaxNumberOfIterations(250).setReEstimationStep(true);
 
@@ -40,7 +41,7 @@ int main(int argc, char **argv) {
 
             std::cout << "RANSAC iterations: " << pe.getNumberOfPerformedIterations() << ", inlier count: " << pe.getNumberOfInliers() << std::endl;
 
-            cilantro::PointCloud3f planar_cloud(cloud, inliers);
+            planar_cloud = cilantro::PointCloud3f(cloud, inliers);
             viz.addObject<cilantro::PointCloudRenderable>("plane", planar_cloud.points, cilantro::RenderingProperties().setPointColor(1,0,0).setPointSize(3.0));
 
             std::cout << "Press 'a' for a new estimate" << std::endl;
